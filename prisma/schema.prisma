@@ -11,3 +11,14 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Resource {
+  id          Int      @id @default(autoincrement())
+  name        String
+  category    String
+  description String?
+  location    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
