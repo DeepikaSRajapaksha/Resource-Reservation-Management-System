@@ -1,0 +1,273 @@
+/* ================================
+   Resource Create / Edit Form
+================================ */
+
+.card {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px;
+  box-sizing: border-box;
+  border: 1px solid #e6ebf2;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #172033;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.035);
+}
+
+/* Form Heading */
+
+.card h2 {
+  margin: 0 0 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #edf0f5;
+  color: #172033;
+  font-size: 23px;
+  font-weight: 750;
+  letter-spacing: -0.4px;
+}
+
+/* Form Layout */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 22px;
+}
+
+/* Labels */
+
+.formGrid label {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+/* Full Width Fields */
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+/* Input, Select and Textarea */
+
+.formGrid input,
+.formGrid select,
+.formGrid textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #dbe3ed;
+  border-radius: 8px;
+  outline: none;
+  background: #ffffff;
+  color: #1e293b;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.formGrid input,
+.formGrid select {
+  height: 46px;
+}
+
+.formGrid textarea {
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.7;
+}
+
+.formGrid input::placeholder,
+.formGrid textarea::placeholder {
+  color: #a0aec0;
+}
+
+.formGrid input:hover,
+.formGrid select:hover,
+.formGrid textarea:hover {
+  border-color: #b8c6d9;
+}
+
+.formGrid input:focus,
+.formGrid select:focus,
+.formGrid textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+  background: #ffffff;
+}
+
+/* Select Fields */
+
+.formGrid select {
+  cursor: pointer;
+}
+
+/* Form Actions */
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 23px;
+  border-top: 1px solid #edf0f5;
+}
+
+/* Create / Update Button */
+
+.actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 12px 22px;
+  border: 1px solid #2563eb;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.14);
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.actions button:hover:not(:disabled) {
+  background: #1d4ed8;
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.2);
+  transform: translateY(-1px);
+}
+
+.actions button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Cancel Button */
+
+.cancelButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 11px 22px;
+  border: 1px solid #dbe3ed;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.cancelButton:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+/* Error Message */
+
+.error {
+  margin: 0 0 24px;
+  padding: 14px 16px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Keyboard Accessibility */
+
+.actions button:focus-visible,
+.cancelButton:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 3px;
+}
+
+/* Tablet */
+
+@media (max-width: 768px) {
+  .card {
+    padding: 25px;
+  }
+
+  .formGrid {
+    gap: 21px 16px;
+  }
+
+  .card h2 {
+    font-size: 21px;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 560px) {
+  .card {
+    padding: 20px 16px;
+    border-radius: 11px;
+  }
+
+  .card h2 {
+    margin-bottom: 23px;
+    padding-bottom: 17px;
+    font-size: 20px;
+  }
+
+  .formGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .fullWidth {
+    grid-column: auto;
+  }
+
+  .formGrid input,
+  .formGrid select {
+    height: 45px;
+  }
+
+  .formGrid textarea {
+    min-height: 110px;
+  }
+
+  .actions {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .actions button,
+  .cancelButton {
+    width: 100%;
+    min-height: 45px;
+  }
+}

@@ -2,7 +2,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import styles from "@/styles/Resources.module.css";
+import Link from "next/link";
+import styles from "@/styles/Resources/Resources.module.css";
 
 type Resource = {
   id: number;
@@ -13,28 +14,9 @@ type Resource = {
   isActive: boolean;
 };
 
-type ResourceForm = {
-  name: string;
-  category: string;
-  description: string;
-  location: string;
-  isActive: boolean;
-};
-
-const emptyForm: ResourceForm = {
-  name: "",
-  category: "",
-  description: "",
-  location: "",
-  isActive: true,
-};
-
 export default function ResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([]);
-  const [form, setForm] = useState<ResourceForm>(emptyForm);
-  const [editingId, setEditingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   const loadResources = useCallback(async () => {
@@ -45,13 +27,15 @@ export default function ResourcesPage() {
       const response = await fetch("/api/resources");
 
       if (!response.ok) {
-        throw new Error("Could not load resources");
+        throw new Error("Could not load resources.");
       }
 
       const data: Resource[] = await response.json();
       setResources(data);
-    } catch {
-      setError("Failed to load resources. Check your server and database.");
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to load resources."
+      );
     } finally {
       setLoading(false);
     }
@@ -60,77 +44,6 @@ export default function ResourcesPage() {
   useEffect(() => {
     void loadResources();
   }, [loadResources]);
-
-  function handleChange(
-    event: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) {
-    const { name, value } = event.target;
-
-    if (name === "isActive") {
-      setForm((current) => ({
-        ...current,
-        isActive: value === "true",
-      }));
-      return;
-    }
-
-    setForm((current) => ({
-      ...current,
-      [name]: value,
-    }));
-  }
-
-  async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
-  ) {
-    event.preventDefault();
-    setSaving(true);
-    setError("");
-
-    try {
-      const response = await fetch(
-        editingId
-          ? `/api/resources/${editingId}`
-          : "/api/resources",
-        {
-          method: editingId ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Operation failed");
-      }
-
-      setForm(emptyForm);
-      setEditingId(null);
-      await loadResources();
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Something went wrong"
-      );
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  function handleEdit(resource: Resource) {
-    setEditingId(resource.id);
-    setForm({
-      name: resource.name,
-      category: resource.category,
-      description: resource.description ?? "",
-      location: resource.location ?? "",
-      isActive: resource.isActive,
-    });
-    setError("");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
 
   async function handleDelete(id: number) {
     const confirmed = window.confirm(
@@ -146,29 +59,17 @@ export default function ResourcesPage() {
         method: "DELETE",
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        throw new Error(result.message || "Delete failed");
-      }
-
-      if (editingId === id) {
-        setEditingId(null);
-        setForm(emptyForm);
+        const result = await response.json().catch(() => ({}));
+        throw new Error(result.message || "Failed to delete resource.");
       }
 
       await loadResources();
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to delete resource"
+        err instanceof Error ? err.message : "Failed to delete resource."
       );
     }
-  }
-
-  function handleCancel() {
-    setEditingId(null);
-    setForm(emptyForm);
-    setError("");
   }
 
   return (
@@ -176,123 +77,48 @@ export default function ResourcesPage() {
       <header className={styles.header}>
         <div>
           <h1>Resource Management</h1>
-          <p>Create, view, update, and manage your resources.</p>
+          <p>View and manage all registered resources.</p>
         </div>
 
-        <div className={styles.total}>
-          Total resources: <strong>{resources.length}</strong>
-        </div>
+        <Link href="/resources/new" className={styles.createButton}>
+          + Create Resource
+        </Link>
       </header>
 
-      {error && (
-        <p className={styles.error} role="alert">
-          {error}
-        </p>
-      )}
-
       <section className={styles.card}>
-        <h2>{editingId ? "Edit Resource" : "Add New Resource"}</h2>
+        <div className={styles.listHeader}>
+          <h2>All Resources</h2>
+          <span>
+            Total: <strong>{resources.length}</strong>
+          </span>
+        </div>
 
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.formGrid}>
-            <label>
-              Resource Name *
-              <input
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                placeholder="e.g. Laptop"
-                required
-              />
-            </label>
-
-            <label>
-              Category *
-              <select
-                name="category"
-                value={form.category}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select category</option>
-                <option value="Equipment">Equipment</option>
-                <option value="Furniture">Furniture</option>
-                <option value="Vehicle">Vehicle</option>
-                <option value="Software">Software</option>
-                <option value="Other">Other</option>
-              </select>
-            </label>
-
-            <label>
-              Location
-              <input
-                name="location"
-                value={form.location}
-                onChange={handleChange}
-                placeholder="e.g. Colombo"
-              />
-            </label>
-
-            <label>
-              Status
-              <select
-                name="isActive"
-                value={String(form.isActive)}
-                onChange={handleChange}
-              >
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
-              </select>
-            </label>
-
-            <label className={styles.fullWidth}>
-              Description
-              <textarea
-                name="description"
-                value={form.description}
-                onChange={handleChange}
-                placeholder="Enter resource details"
-                rows={3}
-              />
-            </label>
-          </div>
-
-          <div className={styles.actions}>
-            <button type="submit" disabled={saving}>
-              {saving
-                ? "Saving..."
-                : editingId
-                  ? "Update Resource"
-                  : "Add Resource"}
-            </button>
-
-            {editingId !== null && (
-              <button
-                type="button"
-                className={styles.cancelButton}
-                onClick={handleCancel}
-              >
-                Cancel
-              </button>
-            )}
-          </div>
-        </form>
-      </section>
-
-      <section className={styles.card}>
-        <h2>Resource List</h2>
+        {error && (
+          <p className={styles.error} role="alert">
+            {error}
+          </p>
+        )}
 
         {loading ? (
           <p>Loading resources...</p>
         ) : resources.length === 0 ? (
-          <p>No resources found. Add your first resource above.</p>
+          <div className={styles.emptyState}>
+            <h3>No resources found</h3>
+            <p>Create your first resource to get started.</p>
+            <Link
+              href="/resources/new"
+              className={styles.createButton}
+            >
+              Create Your First Resource
+            </Link>
+          </div>
         ) : (
           <div className={styles.tableWrapper}>
             <table className={styles.table}>
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Name</th>
+                  <th>Resource</th>
                   <th>Category</th>
                   <th>Location</th>
                   <th>Status</th>
@@ -327,13 +153,12 @@ export default function ResourcesPage() {
                     </td>
                     <td>
                       <div className={styles.rowActions}>
-                        <button
-                          type="button"
+                        <Link
+                          href={`/resources/${resource.id}/edit`}
                           className={styles.editButton}
-                          onClick={() => handleEdit(resource)}
                         >
                           Edit
-                        </button>
+                        </Link>
 
                         <button
                           type="button"
@@ -354,3 +179,4 @@ export default function ResourcesPage() {
     </div>
   );
 }
+
