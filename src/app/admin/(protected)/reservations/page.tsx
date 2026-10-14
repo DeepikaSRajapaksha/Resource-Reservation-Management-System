@@ -90,7 +90,7 @@ export default function ReservationsPage() {
           <p>View and manage resource reservations.</p>
         </div>
 
-        <Link href="/reservations/new" className={styles.addButton}>
+        <Link href="/admin/reservations/new" className={styles.addButton}>
           + New Reservation
         </Link>
       </div>
@@ -101,7 +101,7 @@ export default function ReservationsPage() {
         <div className={styles.empty}>
           <h2>No reservations found</h2>
           <p>Create your first reservation to get started.</p>
-          <Link href="/reservations/new" className={styles.addButton}>
+          <Link href="/admin/reservations/new" className={styles.addButton}>
             Create Reservation
           </Link>
         </div>
@@ -143,7 +143,7 @@ export default function ReservationsPage() {
                   <td>
                     <div className={styles.actions}>
                       <Link
-                        href={`/reservations/${reservation.id}/edit`}
+                        href={`/admin/reservations/${reservation.id}/edit`}
                         className={styles.editButton}
                       >
                         Edit

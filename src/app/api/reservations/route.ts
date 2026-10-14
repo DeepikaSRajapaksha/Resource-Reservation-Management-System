@@ -95,6 +95,25 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    const conflictingReservation = await prisma.reservation.findFirst({
+      where: {
+        resourceId: resourceIdNumber,
+        status: { not: "REJECTED" },
+        startTime: { lt: end },
+        endTime: { gt: start },
+      },
+    });
+
+    if (conflictingReservation) {
+      return NextResponse.json(
+        {
+          message:
+            "This resource has already been reserved for the selected time. Please choose another time.",
+        },
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json(reservation, { status: 201 });
   } catch (error) {
     console.error("Failed to create reservation:", error);

@@ -63,7 +63,7 @@ export default function NewResourcePage() {
         throw new Error(result.message || "Could not create resource.");
       }
 
-      router.push("/resources");
+      router.push("/admin/resources");
       router.refresh();
     } catch (err) {
       setError(
@@ -157,7 +157,7 @@ export default function NewResourcePage() {
               {saving ? "Saving..." : "Create Resource"}
             </button>
 
-            <Link href="/resources" className={styles.cancelButton}>
+            <Link href="/admin/resources" className={styles.cancelButton}>
               Cancel
             </Link>
           </div>

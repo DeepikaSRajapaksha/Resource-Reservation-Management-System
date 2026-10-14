@@ -153,7 +153,7 @@ export default function ReservationForm({ reservationId }: Props) {
         throw new Error(data.message || "Failed to save reservation.");
       }
 
-      router.push("/reservations");
+      router.push("/admin/reservations");
       router.refresh();
     } catch (err) {
       setError(
@@ -267,7 +267,7 @@ export default function ReservationForm({ reservationId }: Props) {
               : "Create Reservation"}
         </button>
 
-        <Link href="/reservations">Cancel</Link>
+        <Link href="/admin/reservations">Cancel</Link>
       </div>
     </form>
   );

@@ -80,7 +80,7 @@ export default function ResourcesPage() {
           <p>View and manage all registered resources.</p>
         </div>
 
-        <Link href="/resources/new" className={styles.createButton}>
+        <Link href="/admin/resources/new" className={styles.createButton}>
           + Create Resource
         </Link>
       </header>
@@ -106,7 +106,7 @@ export default function ResourcesPage() {
             <h3>No resources found</h3>
             <p>Create your first resource to get started.</p>
             <Link
-              href="/resources/new"
+              href="/admin/resources/new"
               className={styles.createButton}
             >
               Create Your First Resource
@@ -154,7 +154,7 @@ export default function ResourcesPage() {
                     <td>
                       <div className={styles.rowActions}>
                         <Link
-                          href={`/resources/${resource.id}/edit`}
+                          href={`/admin/resources/${resource.id}/edit`}
                           className={styles.editButton}
                         >
                           Edit

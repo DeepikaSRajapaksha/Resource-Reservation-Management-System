@@ -23,6 +23,17 @@ body {
   padding: 32px;
 }
 
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.admin-content {
+  flex: 1;
+  min-width: 0;
+  padding: 28px;
+}
+
 @media (max-width: 700px) {
   .app-layout {
     flex-direction: column;

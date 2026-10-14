@@ -8,17 +8,17 @@ import styles from "../../styles/Sidebar.module.css";
 const menuItems = [
   {
     label: "Dashboard",
-    href: "/",
+    href: "/admin/dashboard",
     icon: "▦",
   },
   {
     label: "Resources",
-    href: "/resources",
+    href: "/admin/resources",
     icon: "▣",
   },
   {
     label: "Reservations",
-    href: "/reservations",
+    href: "/admin/reservations",
     icon: "▤",
   },
 ];
@@ -28,7 +28,7 @@ export default function Sidebar() {
 
   return (
     <aside className={styles.sidebar}>
-      <Link href="/" className={styles.brand}>
+      <Link href="/admin/dashboard" className={styles.brand}>
         <span className={styles.logo}>R</span>
 
         <span>

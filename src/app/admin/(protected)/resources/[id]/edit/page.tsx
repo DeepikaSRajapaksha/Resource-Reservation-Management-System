@@ -110,7 +110,7 @@ export default function EditResourcePage() {
         throw new Error(result.message || "Could not update resource.");
       }
 
-      router.push("/resources");
+      router.push("/admin/resources");
       router.refresh();
     } catch (err) {
       setError(
@@ -212,7 +212,7 @@ export default function EditResourcePage() {
               </button>
 
               <Link
-                href="/resources"
+                href="/admin/resources"
                 className={styles.cancelButton}
               >
                 Cancel

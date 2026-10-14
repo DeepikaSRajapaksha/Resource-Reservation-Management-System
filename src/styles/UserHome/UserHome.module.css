@@ -1,0 +1,169 @@
+
+.container {
+  min-height: calc(100vh - 72px);
+  padding: 56px 7%;
+  background: #f7f8fc;
+  color: #172033;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  align-items: center;
+  gap: 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 0 76px;
+}
+
+.content {
+  max-width: 650px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 9px 13px;
+  border-radius: 20px;
+  background: #fff0bf;
+  color: #795700;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.content h1 {
+  margin: 22px 0;
+  font-size: clamp(36px, 5vw, 58px);
+  line-height: 1.13;
+  letter-spacing: -1.8px;
+}
+
+.content h1 span {
+  color: #d49b00;
+}
+
+.content > p {
+  max-width: 540px;
+  color: #647084;
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 30px;
+}
+
+.primaryButton,
+.secondaryButton {
+  padding: 14px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.primaryButton {
+  background: #eab308;
+  color: #172033;
+}
+
+.primaryButton:hover {
+  background: #d49b00;
+}
+
+.secondaryButton {
+  border: 1px solid #d6dbe5;
+  background: white;
+  color: #172033;
+}
+
+.visual {
+  padding: 35px;
+  border: 1px solid #e8eaf0;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 15px 45px #1720330d;
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 55px;
+  height: 55px;
+  border-radius: 14px;
+  background: #eab308;
+  font-size: 30px;
+}
+
+.visual h2 {
+  margin-bottom: 8px;
+}
+
+.visual > p,
+.step p {
+  color: #647084;
+  line-height: 1.7;
+}
+
+.feature {
+  display: flex;
+  gap: 12px;
+  margin-top: 22px;
+  align-items: center;
+}
+
+.feature span {
+  color: #13834b;
+  font-weight: 800;
+}
+
+.steps {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.steps > h2 {
+  margin-bottom: 25px;
+  font-size: 28px;
+}
+
+.stepGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.step {
+  padding: 26px;
+  border: 1px solid #e8eaf0;
+  border-radius: 14px;
+  background: white;
+}
+
+.step > span {
+  color: #c18d00;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.step h3 {
+  margin-bottom: 8px;
+}
+
+@media (max-width: 800px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding-top: 20px;
+  }
+
+  .stepGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .container {
+    padding: 30px 5%;
+  }
+}

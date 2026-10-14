@@ -1,12 +1,6 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import UserNavBar from "@/components/layout/UserNavbar";
+import UserHome from "@/app/(user)/page";
 
-export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        
-      </main>
-    </div>
-  );
+export default function HomePage() {
+  return <UserHome />;
 }
