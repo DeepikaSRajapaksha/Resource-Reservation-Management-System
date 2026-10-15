@@ -1,3 +1,4 @@
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
@@ -20,7 +21,7 @@ const ALLOWED_IMAGE_TYPES = [
 function getResourceId(id: string): number | null {
   const resourceId = Number(id);
 
-  if (!Number.isInteger(resourceId) || resourceId <= 0) {
+  if (!Number.isSafeInteger(resourceId) || resourceId <= 0) {
     return null;
   }
 
@@ -65,11 +66,14 @@ function isValidImageSignature(
   return false;
 }
 
-function imageUrl(id: number, hasImage: boolean): string | null {
+function imageUrl(
+  id: number,
+  hasImage: boolean
+): string | null {
   return hasImage ? `/api/resources/${id}/image` : null;
 }
 
-// GET: Load one resource for the edit form.
+// GET: Retrieve one resource for the edit form.
 export async function GET(
   _request: Request,
   { params }: RouteContext
@@ -92,7 +96,6 @@ export async function GET(
         name: true,
         category: true,
         description: true,
-        location: true,
         isActive: true,
         createdAt: true,
         updatedAt: true,
@@ -127,8 +130,15 @@ export async function GET(
   } catch (error) {
     console.error("GET RESOURCE ERROR:", error);
 
+    // Temporary debugging information.
     return NextResponse.json(
-      { message: "Failed to load resource." },
+      {
+        message: "Failed to load resource.",
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error),
+      },
       { status: 500 }
     );
   }
@@ -203,35 +213,39 @@ export async function PUT(
       );
     }
 
-    const description =
-      typeof descriptionValue === "string"
-        ? descriptionValue.trim() || null
-        : null;
-
-    const data: Prisma.ResourceUpdateInput = {
-      name,
-      category,
-      description,
-      isActive: isActiveValue === "true",
-    };
-
-    const removeImage = removeImageValue === "true";
-
-    if (removeImageValue !== null && !removeImage) {
+    if (
+      removeImageValue !== null &&
+      removeImageValue !== "true" &&
+      removeImageValue !== "false"
+    ) {
       return NextResponse.json(
         { message: "Invalid image removal value." },
         { status: 400 }
       );
     }
 
-    // Remove the image only when explicitly requested.
+    const data: Prisma.ResourceUpdateInput = {
+      name,
+      category,
+      description:
+        typeof descriptionValue === "string"
+          ? descriptionValue.trim() || null
+          : null,
+      isActive: isActiveValue === "true",
+    };
+
+    const removeImage = removeImageValue === "true";
+
     if (removeImage) {
       data.image = null;
       data.imageType = null;
     }
 
-    // A new uploaded image replaces the existing image.
-    if (uploadedImage instanceof File && uploadedImage.size > 0) {
+    // A new image replaces the existing image.
+    if (
+      uploadedImage instanceof File &&
+      uploadedImage.size > 0
+    ) {
       if (!ALLOWED_IMAGE_TYPES.includes(uploadedImage.type)) {
         return NextResponse.json(
           {
@@ -263,7 +277,6 @@ export async function PUT(
         );
       }
 
-      // Use an ArrayBuffer-backed Uint8Array for Prisma Bytes.
       const imageBytes: Uint8Array<ArrayBuffer> =
         new Uint8Array(new ArrayBuffer(buffer.length));
 
@@ -281,7 +294,6 @@ export async function PUT(
         name: true,
         category: true,
         description: true,
-        location: true,
         isActive: true,
         createdAt: true,
         updatedAt: true,
@@ -365,7 +377,7 @@ export async function DELETE(
     return NextResponse.json(
       {
         message:
-          "Failed to delete resource. It may have related reservations.",
+          "Failed to delete resource. It may have existing reservations.",
       },
       { status: 500 }
     );

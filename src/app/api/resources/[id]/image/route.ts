@@ -1,3 +1,4 @@
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
@@ -22,14 +23,16 @@ export async function GET(
     const { id } = await params;
     const resourceId = Number(id);
 
-    if (!Number.isInteger(resourceId) || resourceId <= 0) {
+    if (
+      !Number.isSafeInteger(resourceId) ||
+      resourceId <= 0
+    ) {
       return NextResponse.json(
         { message: "Invalid resource ID." },
         { status: 400 }
       );
     }
 
-    // Retrieve only the image fields from PostgreSQL.
     const resource = await prisma.resource.findUnique({
       where: { id: resourceId },
       select: {
@@ -59,10 +62,8 @@ export async function GET(
       );
     }
 
-    // Convert the PostgreSQL binary data into a Node.js Buffer.
     const imageBuffer = Buffer.from(resource.image);
 
-    // Return the actual image, not JSON.
     return new Response(imageBuffer, {
       status: 200,
       headers: {
