@@ -1,8 +1,10 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useToast } from "@/components/common/ToastProvider";
 import styles from "@/styles/Resources/ResourcesCreate.module.css";
 
 type ResourceFormValues = {
@@ -25,6 +27,7 @@ export default function EditResourcePage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const resourceId = params.id;
+  const { showToast } = useToast();
 
   const [form, setForm] = useState<ResourceFormValues>(emptyForm);
   const [loading, setLoading] = useState(true);
@@ -36,12 +39,16 @@ export default function EditResourcePage() {
 
     async function loadResource() {
       try {
-        const response = await fetch(`/api/resources/${resourceId}`);
+        setLoading(true);
+        setError("");
 
+        const response = await fetch(`/api/resources/${resourceId}`);
         const result = await response.json().catch(() => ({}));
 
         if (!response.ok) {
-          throw new Error(result.message || "Could not find this resource.");
+          throw new Error(
+            result.message || result.error || "Could not find this resource."
+          );
         }
 
         if (!cancelled) {
@@ -55,11 +62,13 @@ export default function EditResourcePage() {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(
+          const message =
             err instanceof Error
               ? err.message
-              : "Failed to load resource."
-          );
+              : "Failed to load resource.";
+
+          setError(message);
+          showToast("error", message);
         }
       } finally {
         if (!cancelled) {
@@ -73,7 +82,7 @@ export default function EditResourcePage() {
     return () => {
       cancelled = true;
     };
-  }, [resourceId]);
+  }, [resourceId, showToast]);
 
   function handleChange(
     event: React.ChangeEvent<
@@ -92,6 +101,7 @@ export default function EditResourcePage() {
     event: React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
+
     setSaving(true);
     setError("");
 
@@ -107,17 +117,28 @@ export default function EditResourcePage() {
       const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(result.message || "Could not update resource.");
+        throw new Error(
+          result.message ||
+            result.error ||
+            "Could not update resource."
+        );
       }
 
-      router.push("/admin/resources");
-      router.refresh();
+      showToast("success", "Resource updated successfully!");
+
+      // Show the success toast before navigating away.
+      window.setTimeout(() => {
+        router.push("/admin/resources");
+        router.refresh();
+      }, 1800);
     } catch (err) {
-      setError(
+      const message =
         err instanceof Error
           ? err.message
-          : "Something went wrong."
-      );
+          : "Something went wrong. Please try again.";
+
+      setError(message);
+      showToast("error", message);
     } finally {
       setSaving(false);
     }

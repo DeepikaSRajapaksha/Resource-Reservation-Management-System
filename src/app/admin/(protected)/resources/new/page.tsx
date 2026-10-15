@@ -1,8 +1,10 @@
+
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useToast } from "@/components/common/ToastProvider";
 import styles from "@/styles/Resources/ResourcesCreate.module.css";
 
 type ResourceFormValues = {
@@ -23,6 +25,7 @@ const emptyForm: ResourceFormValues = {
 
 export default function NewResourcePage() {
   const router = useRouter();
+  const { showToast } = useToast();
 
   const [form, setForm] = useState<ResourceFormValues>(emptyForm);
   const [saving, setSaving] = useState(false);
@@ -45,6 +48,7 @@ export default function NewResourcePage() {
     event: React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
+
     setSaving(true);
     setError("");
 
@@ -60,15 +64,28 @@ export default function NewResourcePage() {
       const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(result.message || "Could not create resource.");
+        throw new Error(
+          result.message ||
+            result.error ||
+            "Could not create resource."
+        );
       }
 
-      router.push("/admin/resources");
-      router.refresh();
+      showToast("success", "Resource created successfully!");
+
+      // Give the user time to see the success notification.
+      window.setTimeout(() => {
+        router.push("/admin/resources");
+        router.refresh();
+      }, 1800);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Something went wrong."
-      );
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.";
+
+      setError(message);
+      showToast("error", message);
     } finally {
       setSaving(false);
     }
@@ -157,7 +174,10 @@ export default function NewResourcePage() {
               {saving ? "Saving..." : "Create Resource"}
             </button>
 
-            <Link href="/admin/resources" className={styles.cancelButton}>
+            <Link
+              href="/admin/resources"
+              className={styles.cancelButton}
+            >
               Cancel
             </Link>
           </div>

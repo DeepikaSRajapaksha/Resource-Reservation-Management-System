@@ -1,24 +1,16 @@
+
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "@/styles/Reservations/ReservationForm.module.css";
+import { useToast } from "@/components/common/ToastProvider";
 
 type Resource = {
   id: number;
   name: string;
   isActive: boolean;
-};
-
-type Reservation = {
-  id: number;
-  resourceId: number;
-  reservedBy: string;
-  startTime: string;
-  endTime: string;
-  purpose: string;
-  status: string;
 };
 
 type Props = {
@@ -27,6 +19,7 @@ type Props = {
 
 export default function ReservationForm({ reservationId }: Props) {
   const router = useRouter();
+  const { showToast } = useToast();
 
   const [resources, setResources] = useState<Resource[]>([]);
   const [form, setForm] = useState({
@@ -55,7 +48,8 @@ export default function ReservationForm({ reservationId }: Props) {
         }
 
         const resourcesData = await resourcesResponse.json();
-        const activeResources = resourcesData.filter(
+
+        const activeResources: Resource[] = resourcesData.filter(
           (resource: Resource) => resource.isActive
         );
 
@@ -69,7 +63,9 @@ export default function ReservationForm({ reservationId }: Props) {
           const data = await response.json();
 
           if (!response.ok) {
-            throw new Error(data.message || "Could not load reservation.");
+            throw new Error(
+              data.message || "Could not load reservation."
+            );
           }
 
           const toLocalDateTime = (value: string) => {
@@ -91,16 +87,20 @@ export default function ReservationForm({ reservationId }: Props) {
           });
         }
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Something went wrong."
-        );
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Something went wrong while loading the form.";
+
+        setError(message);
+        showToast("error", message);
       } finally {
         setLoading(false);
       }
     }
 
     loadData();
-  }, [reservationId]);
+  }, [reservationId, showToast]);
 
   function handleChange(
     event: React.ChangeEvent<
@@ -119,20 +119,28 @@ export default function ReservationForm({ reservationId }: Props) {
     event.preventDefault();
     setError("");
 
+    if (!form.resourceId) {
+      showToast("error", "Please select a resource.");
+      return;
+    }
+
     if (new Date(form.endTime) <= new Date(form.startTime)) {
-      setError("End time must be after start time.");
+      const message = "End time must be after start time.";
+      setError(message);
+      showToast("error", message);
       return;
     }
 
     try {
       setSaving(true);
 
-      const url =
-        reservationId !== undefined
-          ? `/api/reservations/${reservationId}`
-          : "/api/reservations";
+      const isEditing = reservationId !== undefined;
 
-      const method = reservationId !== undefined ? "PUT" : "POST";
+      const url = isEditing
+        ? `/api/reservations/${reservationId}`
+        : "/api/reservations";
+
+      const method = isEditing ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
@@ -147,18 +155,36 @@ export default function ReservationForm({ reservationId }: Props) {
         }),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to save reservation.");
+        throw new Error(
+          data?.message ||
+            data?.error ||
+            "Failed to save reservation."
+        );
       }
 
-      router.push("/admin/reservations");
-      router.refresh();
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Something went wrong."
+      showToast(
+        "success",
+        isEditing
+          ? "Reservation updated successfully!"
+          : "Reservation created successfully!"
       );
+
+      // Allow the notification to be seen before navigating.
+      window.setTimeout(() => {
+        router.push("/admin/reservations");
+        router.refresh();
+      }, 1800);
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.";
+
+      setError(message);
+      showToast("error", message);
     } finally {
       setSaving(false);
     }
@@ -182,14 +208,18 @@ export default function ReservationForm({ reservationId }: Props) {
           required
         >
           <option value="">Select a resource</option>
+
           {resources.map((resource) => (
             <option key={resource.id} value={resource.id}>
               {resource.name}
             </option>
           ))}
         </select>
+
         {resources.length === 0 && (
-          <small>Create an active resource before making a reservation.</small>
+          <small>
+            Create an active resource before making a reservation.
+          </small>
         )}
       </div>
 
@@ -206,7 +236,7 @@ export default function ReservationForm({ reservationId }: Props) {
       </div>
 
       <div className={styles.field}>
-        <label htmlFor="startTime">Start Date & Time</label>
+        <label htmlFor="startTime">Start Date &amp; Time</label>
         <input
           id="startTime"
           name="startTime"
@@ -218,7 +248,7 @@ export default function ReservationForm({ reservationId }: Props) {
       </div>
 
       <div className={styles.field}>
-        <label htmlFor="endTime">End Date & Time</label>
+        <label htmlFor="endTime">End Date &amp; Time</label>
         <input
           id="endTime"
           name="endTime"
@@ -259,7 +289,10 @@ export default function ReservationForm({ reservationId }: Props) {
       )}
 
       <div className={styles.actions}>
-        <button type="submit" disabled={saving || resources.length === 0}>
+        <button
+          type="submit"
+          disabled={saving || resources.length === 0}
+        >
           {saving
             ? "Saving..."
             : reservationId !== undefined

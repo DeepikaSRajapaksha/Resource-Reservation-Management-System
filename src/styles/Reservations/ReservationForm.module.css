@@ -5,11 +5,11 @@
   width: 100%;
   max-width: 700px;
   padding: 28px;
-  margin: 0 auto; /* Centers the form horizontally */
+  margin: 0 auto;
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 16px rgba(17, 24, 39, 0.06);
   box-sizing: border-box;
 }
 
@@ -22,35 +22,48 @@
 .field label {
   font-size: 14px;
   font-weight: 600;
-  color: #374151;
+  color: #111827;
 }
 
 .field input,
 .field select,
 .field textarea {
   width: 100%;
-  padding: 12px;
+  padding: 12px 14px;
   border: 1px solid #d1d5db;
-  border-radius: 7px;
-  background: #ffffff;
+  border-radius: 8px;
+  background: #f9fafb;
   color: #111827;
   font: inherit;
   box-sizing: border-box;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: #9ca3af;
 }
 
 .field input:focus,
 .field select:focus,
 .field textarea:focus {
-  outline: 2px solid #93c5fd;
-  border-color: #2563eb;
+  outline: none;
+  border-color: #facc15;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.2);
 }
 
 .field textarea {
   resize: vertical;
+  min-height: 100px;
 }
 
 .field small {
-  color: #b45309;
+  color: #92400e;
+  font-size: 12px;
 }
 
 .actions {
@@ -62,40 +75,104 @@
 }
 
 .actions button {
-  padding: 12px 18px;
-  border: none;
-  border-radius: 7px;
-  background: #2563eb;
-  color: white;
-  font-weight: 600;
+  padding: 12px 20px;
+  border: 2px solid #facc15;
+  border-radius: 8px;
+  background: #facc15;
+  color: #111827;
+  font-weight: 700;
+  font-size: 14px;
   cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .actions button:hover {
-  background: #1d4ed8;
+  background: #eab308;
+  border-color: #eab308;
+  transform: translateY(-1px);
+}
+
+.actions button:focus-visible,
+.actions a:focus-visible {
+  outline: 3px solid rgba(250, 204, 21, 0.5);
+  outline-offset: 3px;
 }
 
 .actions button:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
+  transform: none;
 }
 
 .actions a {
-  color: #4b5563;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 18px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  color: #374151;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
   text-decoration: none;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .actions a:hover {
-  text-decoration: underline;
+  color: #111827;
+  background: #f3f4f6;
+  border-color: #9ca3af;
 }
 
 .error {
-  padding: 12px;
-  border-radius: 7px;
-  background: #fee2e2;
+  padding: 14px 16px;
+  border: 1px solid #fecaca;
+  border-left: 4px solid #dc2626;
+  border-radius: 8px;
+  background: #fef2f2;
   color: #991b1b;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .message {
   color: #4b5563;
+  text-align: center;
+  padding: 24px;
+}
+
+@media (max-width: 600px) {
+  .form {
+    padding: 20px 16px;
+    gap: 18px;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions button,
+  .actions a {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field input,
+  .field select,
+  .field textarea,
+  .actions button,
+  .actions a {
+    transition: none;
+  }
 }

@@ -4,6 +4,8 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import styles from "@/styles/Resources/Resources.module.css";
+import ConfirmModal from "@/components/common/ConfirmModal";
+import { useToast } from "@/components/common/ToastProvider";
 
 type Resource = {
   id: number;
@@ -18,6 +20,10 @@ export default function ResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { showToast } = useToast();
+
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const loadResources = useCallback(async () => {
     setLoading(true);
@@ -45,30 +51,37 @@ export default function ResourcesPage() {
     void loadResources();
   }, [loadResources]);
 
-  async function handleDelete(id: number) {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this resource?"
-    );
+  async function handleDelete() {
+    if (deleteId === null) return;
 
-    if (!confirmed) return;
-
+    setDeleting(true);
     setError("");
 
     try {
-      const response = await fetch(`/api/resources/${id}`, {
+      const response = await fetch(`/api/resources/${deleteId}`, {
         method: "DELETE",
       });
 
+      const result = await response.json().catch(() => ({}));
+
       if (!response.ok) {
-        const result = await response.json().catch(() => ({}));
-        throw new Error(result.message || "Failed to delete resource.");
+        throw new Error(
+          result.message || result.error || "Failed to delete resource."
+        );
       }
+
+      setDeleteId(null);
+      showToast("success", "Resource deleted successfully!");
 
       await loadResources();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to delete resource."
-      );
+      const message =
+        err instanceof Error ? err.message : "Failed to delete resource.";
+
+      setError(message);
+      showToast("error", message);
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -163,7 +176,7 @@ export default function ResourcesPage() {
                         <button
                           type="button"
                           className={styles.deleteButton}
-                          onClick={() => handleDelete(resource.id)}
+                          onClick={() => setDeleteId(resource.id)}
                         >
                           Delete
                         </button>
@@ -176,6 +189,15 @@ export default function ResourcesPage() {
           </div>
         )}
       </section>
+      {deleteId !== null && (
+        <ConfirmModal
+          title="Delete Resource?"
+          message="Are you sure you want to delete this resource? This action cannot be undone."
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteId(null)}
+          loading={deleting}
+        />
+      )}
     </div>
   );
 }

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import ConfirmModal from "@/components/common/ConfirmModal";
+import { useToast } from "@/components/common/ToastProvider";
 import styles from "../../styles/Sidebar.module.css";
 
 const menuItems = [
@@ -26,39 +28,48 @@ const menuItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { showToast } = useToast();
+
   const [isOpen, setIsOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   function closeMenu() {
     setIsOpen(false);
   }
 
   async function handleLogout() {
+    if (loggingOut) return;
+
+    setLoggingOut(true);
+
     try {
       const response = await fetch("/api/admin/logout", {
         method: "POST",
       });
 
       if (!response.ok) {
-        const message = await response.text();
-
-        console.error("Logout API response:", message);
+        const result = await response.json().catch(() => ({}));
 
         throw new Error(
-          `Logout failed. HTTP status: ${response.status}`
+          result.message || result.error || "Unable to log out."
         );
       }
 
+      setShowLogoutModal(false);
       closeMenu();
+
+      showToast("success", "Logged out successfully!");
+
       router.replace("/admin/login");
       router.refresh();
     } catch (error) {
-      console.error("Logout error:", error);
+      const message =
+        error instanceof Error ? error.message : "Unable to log out.";
 
-      alert(
-        error instanceof Error
-          ? error.message
-          : "Unable to log out."
-      );
+      showToast("error", message);
+    } finally {
+      setLoggingOut(false);
     }
   }
 
@@ -134,8 +145,9 @@ export default function Sidebar() {
 
         <button
           type="button"
-          onClick={handleLogout}
+          onClick={() => setShowLogoutModal(true)}
           className={styles.logoutButton}
+          disabled={loggingOut}
         >
           <span aria-hidden="true">↪</span>
           Logout
@@ -150,6 +162,17 @@ export default function Sidebar() {
           </div>
         </div>
       </aside>
+
+      {/* Reusable logout confirmation modal */}
+      {showLogoutModal && (
+        <ConfirmModal
+          title="Confirm Logout"
+          message="Are you sure you want to log out of the ResourceHub Admin Panel?"
+          onConfirm={handleLogout}
+          onCancel={() => setShowLogoutModal(false)}
+          loading={loggingOut}
+        />
+      )}
     </>
   );
 }

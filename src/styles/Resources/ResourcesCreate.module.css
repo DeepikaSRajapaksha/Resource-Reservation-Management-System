@@ -1,5 +1,6 @@
 /* ================================
    Resource Create / Edit Form
+   ResourceHub Theme
 ================================ */
 
 .card {
@@ -8,11 +9,11 @@
   margin: 0 auto;
   padding: 32px;
   box-sizing: border-box;
-  border: 1px solid #e6ebf2;
+  border: 1px solid #e5e7eb;
   border-radius: 14px;
   background: #ffffff;
-  color: #172033;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.035);
+  color: #111827;
+  box-shadow: 0 4px 20px rgba(17, 24, 39, 0.05);
 }
 
 /* Form Heading */
@@ -20,8 +21,8 @@
 .card h2 {
   margin: 0 0 28px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #edf0f5;
-  color: #172033;
+  border-bottom: 1px solid #e5e7eb;
+  color: #111827;
   font-size: 23px;
   font-weight: 750;
   letter-spacing: -0.4px;
@@ -48,7 +49,7 @@
   flex-direction: column;
   gap: 9px;
   min-width: 0;
-  color: #334155;
+  color: #374151;
   font-size: 13px;
   font-weight: 650;
 }
@@ -68,11 +69,11 @@
   min-width: 0;
   box-sizing: border-box;
   padding: 12px 14px;
-  border: 1px solid #dbe3ed;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
   outline: none;
-  background: #ffffff;
-  color: #1e293b;
+  background: #f9fafb;
+  color: #111827;
   font-family: inherit;
   font-size: 14px;
   font-weight: 400;
@@ -95,20 +96,21 @@
 
 .formGrid input::placeholder,
 .formGrid textarea::placeholder {
-  color: #a0aec0;
+  color: #9ca3af;
 }
 
 .formGrid input:hover,
 .formGrid select:hover,
 .formGrid textarea:hover {
-  border-color: #b8c6d9;
+  border-color: #9ca3af;
+  background: #ffffff;
 }
 
 .formGrid input:focus,
 .formGrid select:focus,
 .formGrid textarea:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+  border-color: #eab308;
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.2);
   background: #ffffff;
 }
 
@@ -125,7 +127,7 @@
   align-items: center;
   gap: 12px;
   padding-top: 23px;
-  border-top: 1px solid #edf0f5;
+  border-top: 1px solid #e5e7eb;
 }
 
 /* Create / Update Button */
@@ -136,15 +138,15 @@
   justify-content: center;
   min-height: 44px;
   padding: 12px 22px;
-  border: 1px solid #2563eb;
+  border: 1px solid #facc15;
   border-radius: 8px;
-  background: #2563eb;
-  color: #ffffff;
+  background: #facc15;
+  color: #111827;
   font-family: inherit;
   font-size: 14px;
-  font-weight: 650;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.14);
+  box-shadow: 0 4px 10px rgba(17, 24, 39, 0.1);
   transition:
     background 0.2s ease,
     box-shadow 0.2s ease,
@@ -152,8 +154,9 @@
 }
 
 .actions button:hover:not(:disabled) {
-  background: #1d4ed8;
-  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.2);
+  border-color: #eab308;
+  background: #eab308;
+  box-shadow: 0 6px 14px rgba(17, 24, 39, 0.14);
   transform: translateY(-1px);
 }
 
@@ -171,10 +174,10 @@
   min-height: 44px;
   box-sizing: border-box;
   padding: 11px 22px;
-  border: 1px solid #dbe3ed;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
   background: #ffffff;
-  color: #475569;
+  color: #374151;
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
@@ -185,9 +188,9 @@
 }
 
 .cancelButton:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
-  color: #1e293b;
+  border-color: #9ca3af;
+  background: #f3f4f6;
+  color: #111827;
 }
 
 /* Error Message */
@@ -196,9 +199,10 @@
   margin: 0 0 24px;
   padding: 14px 16px;
   border: 1px solid #fecaca;
+  border-left: 4px solid #dc2626;
   border-radius: 8px;
   background: #fef2f2;
-  color: #b91c1c;
+  color: #991b1b;
   font-size: 14px;
   line-height: 1.6;
 }
@@ -207,7 +211,7 @@
 
 .actions button:focus-visible,
 .cancelButton:focus-visible {
-  outline: 3px solid #93c5fd;
+  outline: 3px solid rgba(250, 204, 21, 0.65);
   outline-offset: 3px;
 }
 
@@ -269,5 +273,17 @@
   .cancelButton {
     width: 100%;
     min-height: 45px;
+  }
+}
+
+/* Reduced Motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .formGrid input,
+  .formGrid select,
+  .formGrid textarea,
+  .actions button,
+  .cancelButton {
+    transition: none;
   }
 }

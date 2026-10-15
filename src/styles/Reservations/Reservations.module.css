@@ -1,6 +1,9 @@
 .container {
   padding: 32px;
   color: #111827;
+  background: #f9fafb;
+  min-height: 100%;
+  box-sizing: border-box;
 }
 
 .header {
@@ -14,33 +17,44 @@
 .header h1 {
   margin: 0 0 8px;
   font-size: 28px;
+  font-weight: 700;
+  color: #111827;
 }
 
 .header p {
   margin: 0;
   color: #6b7280;
+  line-height: 1.6;
 }
 
 .addButton {
   display: inline-block;
-  padding: 11px 16px;
-  border-radius: 7px;
-  background: #2563eb;
-  color: white;
+  padding: 11px 18px;
+  border: 2px solid #facc15;
+  border-radius: 8px;
+  background: #facc15;
+  color: #111827;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .addButton:hover {
-  background: #1d4ed8;
+  background: #eab308;
+  border-color: #eab308;
+  transform: translateY(-1px);
 }
 
 .tableWrapper {
   overflow-x: auto;
   border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: white;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(17, 24, 39, 0.05);
 }
 
 .table {
@@ -51,20 +65,29 @@
 
 .table th,
 .table td {
-  padding: 14px;
+  padding: 15px 16px;
   text-align: left;
   border-bottom: 1px solid #e5e7eb;
   white-space: nowrap;
 }
 
 .table th {
-  background: #f9fafb;
-  color: #374151;
+  background: #7d7d7d;
+  color: #facc15;
   font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.table td {
+  color: #374151;
+}
+
+.table tbody tr {
+  transition: background 0.2s ease;
 }
 
 .table tbody tr:hover {
-  background: #f9fafb;
+  background: #fffbeb;
 }
 
 .table tbody tr:last-child td {
@@ -79,30 +102,50 @@
 
 .editButton,
 .deleteButton {
-  padding: 7px 10px;
-  border: none;
-  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   font-size: 13px;
+  font-weight: 600;
   text-decoration: none;
   cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .editButton {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: #fef3c7;
+  color: #78350f;
+  border-color: #fde68a;
+}
+
+.editButton:hover {
+  background: #fde68a;
+  border-color: #facc15;
 }
 
 .deleteButton {
-  background: #fee2e2;
+  background: #fef2f2;
   color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.deleteButton:hover {
+  background: #fee2e2;
+  border-color: #f87171;
 }
 
 .status {
   display: inline-block;
-  padding: 5px 9px;
+  padding: 5px 10px;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
+  text-transform: capitalize;
 }
 
 .pending {
@@ -121,27 +164,43 @@
 }
 
 .error {
-  padding: 12px;
-  background: #fee2e2;
+  padding: 14px 16px;
+  background: #fef2f2;
   color: #991b1b;
-  border-radius: 7px;
+  border: 1px solid #fecaca;
+  border-left: 4px solid #dc2626;
+  border-radius: 8px;
+  line-height: 1.5;
 }
 
 .empty {
   padding: 48px 20px;
   border: 1px dashed #d1d5db;
-  border-radius: 10px;
+  border-radius: 12px;
+  background: #ffffff;
   text-align: center;
+}
+
+.empty h2 {
+  color: #111827;
 }
 
 .empty p {
   margin-bottom: 24px;
   color: #6b7280;
+  line-height: 1.6;
+}
+
+.addButton:focus-visible,
+.editButton:focus-visible,
+.deleteButton:focus-visible {
+  outline: 3px solid rgba(250, 204, 21, 0.5);
+  outline-offset: 3px;
 }
 
 @media (max-width: 700px) {
   .container {
-    padding: 18px;
+    padding: 18px 14px;
   }
 
   .header {
@@ -151,5 +210,25 @@
 
   .header h1 {
     font-size: 24px;
+  }
+
+  .addButton {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+  }
+
+  .table th,
+  .table td {
+    padding: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .addButton,
+  .table tbody tr,
+  .editButton,
+  .deleteButton {
+    transition: none;
   }
 }

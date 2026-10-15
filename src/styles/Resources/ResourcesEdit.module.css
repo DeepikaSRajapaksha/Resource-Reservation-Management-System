@@ -1,10 +1,17 @@
+/* ================================
+   Resource Create / Edit Page
+   ResourceHub Theme
+================================ */
+
 .page {
   min-height: 100vh;
   box-sizing: border-box;
   padding: 36px;
-  background: #f4f7fb;
-  color: #172033;
+  background: #f9fafb;
+  color: #111827;
 }
+
+/* Main Container */
 
 .container {
   width: 100%;
@@ -12,19 +19,24 @@
   margin: 0 auto;
 }
 
+/* Back Link */
+
 .backLink {
   display: inline-block;
   margin-bottom: 24px;
-  color: #2563eb;
+  color: #92400e;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
+  transition: color 0.2s ease;
 }
 
 .backLink:hover {
-  color: #1d4ed8;
+  color: #b45309;
   text-decoration: underline;
 }
+
+/* Page Header */
 
 .header {
   margin-bottom: 26px;
@@ -32,7 +44,7 @@
 
 .header h1 {
   margin: 0;
-  color: #172033;
+  color: #111827;
   font-size: 30px;
   font-weight: 750;
   letter-spacing: -0.6px;
@@ -40,10 +52,20 @@
 
 .header p {
   margin: 9px 0 0;
-  color: #718096;
+  color: #6b7280;
   font-size: 14px;
   line-height: 1.7;
 }
+
+/* Keyboard Accessibility */
+
+.backLink:focus-visible {
+  outline: 3px solid rgba(250, 204, 21, 0.65);
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+
+/* Mobile Responsive */
 
 @media (max-width: 600px) {
   .page {
@@ -56,5 +78,13 @@
 
   .header {
     margin-bottom: 20px;
+  }
+}
+
+/* Reduced Motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .backLink {
+    transition: none;
   }
 }

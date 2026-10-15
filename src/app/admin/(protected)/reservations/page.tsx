@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import ConfirmModal from "@/components/common/ConfirmModal";
+import { useToast } from "@/components/common/ToastProvider";
 import styles from "@/styles/Reservations/Reservations.module.css";
 
 type Reservation = {
@@ -22,6 +24,10 @@ export default function ReservationsPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const { showToast } = useToast();
 
   const loadReservations = useCallback(async () => {
     try {
@@ -36,46 +42,65 @@ export default function ReservationsPage() {
 
       setReservations(data);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Something went wrong."
-      );
+      const message =
+        err instanceof Error ? err.message : "Something went wrong.";
+
+      setError(message);
+      showToast("error", message);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
-    loadReservations();
+    void loadReservations();
   }, [loadReservations]);
 
-  async function handleDelete(id: number) {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this reservation?"
-    );
+  async function handleDelete() {
+    if (deleteId === null) return;
 
-    if (!confirmed) return;
+    setDeleting(true);
+    setError("");
 
     try {
-      const response = await fetch(`/api/reservations/${id}`, {
+      const response = await fetch(`/api/reservations/${deleteId}`, {
         method: "DELETE",
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to delete reservation.");
+        throw new Error(
+          data.message || data.error || "Failed to delete reservation."
+        );
       }
+
+      setDeleteId(null);
+      showToast("success", "Reservation deleted successfully!");
 
       await loadReservations();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to delete reservation."
-      );
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Failed to delete reservation.";
+
+      setError(message);
+      showToast("error", message);
+    } finally {
+      setDeleting(false);
     }
   }
 
   function formatDate(value: string) {
-    return new Date(value).toLocaleString();
+    return new Date(value).toLocaleString("en-GB", {
+      timeZone: "Asia/Colombo",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   }
 
   if (loading) {
@@ -95,7 +120,11 @@ export default function ReservationsPage() {
         </Link>
       </div>
 
-      {error && <p className={styles.error}>{error}</p>}
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
 
       {reservations.length === 0 ? (
         <div className={styles.empty}>
@@ -152,7 +181,7 @@ export default function ReservationsPage() {
                       <button
                         type="button"
                         className={styles.deleteButton}
-                        onClick={() => handleDelete(reservation.id)}
+                        onClick={() => setDeleteId(reservation.id)}
                       >
                         Delete
                       </button>
@@ -163,6 +192,16 @@ export default function ReservationsPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {deleteId !== null && (
+        <ConfirmModal
+          title="Delete Reservation?"
+          message="Are you sure you want to delete this reservation? This action cannot be undone."
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteId(null)}
+          loading={deleting}
+        />
       )}
     </main>
   );

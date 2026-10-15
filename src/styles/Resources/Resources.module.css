@@ -5,9 +5,10 @@
 .page {
   min-height: 100vh;
   padding: 36px;
-  background: #f4f7fb;
-  color: #172033;
+  background: #f9fafb;
+  color: #111827;
   font-family: Arial, Helvetica, sans-serif;
+  box-sizing: border-box;
 }
 
 /* Page Header */
@@ -22,7 +23,7 @@
 
 .header h1 {
   margin: 0;
-  color: #172033;
+  color: #111827;
   font-size: 30px;
   font-weight: 750;
   letter-spacing: -0.8px;
@@ -30,7 +31,7 @@
 
 .header p {
   margin: 9px 0 0;
-  color: #718096;
+  color: #6b7280;
   font-size: 15px;
   line-height: 1.6;
 }
@@ -43,15 +44,15 @@
   justify-content: center;
   gap: 8px;
   padding: 12px 19px;
-  border: 1px solid #2563eb;
+  border: 1px solid #facc15;
   border-radius: 9px;
-  background: #2563eb;
-  color: #ffffff;
+  background: #facc15;
+  color: #111827;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.16);
+  box-shadow: 0 4px 10px rgba(17, 24, 39, 0.1);
   transition:
     background 0.2s ease,
     transform 0.2s ease,
@@ -59,8 +60,9 @@
 }
 
 .createButton:hover {
-  background: #1d4ed8;
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.23);
+  background: #eab308;
+  border-color: #eab308;
+  box-shadow: 0 6px 16px rgba(17, 24, 39, 0.14);
   transform: translateY(-1px);
 }
 
@@ -68,10 +70,10 @@
 
 .card {
   overflow: hidden;
-  border: 1px solid #e6ebf2;
+  border: 1px solid #e5e7eb;
   border-radius: 14px;
   background: #ffffff;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.035);
+  box-shadow: 0 4px 20px rgba(17, 24, 39, 0.05);
 }
 
 /* Table Section Header */
@@ -82,18 +84,18 @@
   justify-content: space-between;
   gap: 16px;
   padding: 23px 26px;
-  border-bottom: 1px solid #edf0f5;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .listHeader h2 {
   margin: 0;
-  color: #172033;
+  color: #111827;
   font-size: 18px;
   font-weight: 700;
 }
 
 .listHeader span {
-  color: #718096;
+  color: #6b7280;
   font-size: 13px;
 }
 
@@ -106,8 +108,8 @@
   margin-left: 5px;
   padding: 0 8px;
   border-radius: 7px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: #fef3c7;
+  color: #78350f;
   font-size: 13px;
 }
 
@@ -127,13 +129,13 @@
 }
 
 .table thead {
-  background: #f8fafc;
+  background: #7d7d7d;
 }
 
 .table th {
   padding: 15px 22px;
-  border-bottom: 1px solid #e9eef5;
-  color: #64748b;
+  border-bottom: 1px solid #374151;
+  color: #facc15;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.8px;
@@ -143,8 +145,8 @@
 
 .table td {
   padding: 19px 22px;
-  border-bottom: 1px solid #edf1f6;
-  color: #475569;
+  border-bottom: 1px solid #e5e7eb;
+  color: #4b5563;
   font-size: 14px;
   vertical-align: middle;
 }
@@ -154,7 +156,7 @@
 }
 
 .table tbody tr:hover {
-  background: #f8fbff;
+  background: #fffbeb;
 }
 
 .table tbody tr:last-child td {
@@ -162,13 +164,13 @@
 }
 
 .table td:first-child {
-  color: #64748b;
+  color: #6b7280;
   font-size: 13px;
   font-weight: 600;
 }
 
 .table td strong {
-  color: #1e293b;
+  color: #111827;
   font-size: 14px;
   font-weight: 650;
 }
@@ -179,7 +181,7 @@
   max-width: 260px;
   margin: 6px 0 0;
   overflow-wrap: anywhere;
-  color: #94a3b8;
+  color: #6b7280;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -199,8 +201,8 @@
 }
 
 .active {
-  background: #ecfdf3;
-  color: #15803d;
+  background: #dcfce7;
+  color: #166534;
 }
 
 .active::before {
@@ -212,15 +214,15 @@
 }
 
 .inactive {
-  background: #fff1f2;
-  color: #be123c;
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 .inactive::before {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #f43f5e;
+  background: #ef4444;
   content: "";
 }
 
@@ -254,31 +256,31 @@
 }
 
 .editButton {
-  border-color: #dbeafe;
-  background: #eff6ff;
-  color: #2563eb;
+  border-color: #fde68a;
+  background: #fef3c7;
+  color: #78350f;
 }
 
 .editButton:hover {
-  border-color: #93c5fd;
-  background: #dbeafe;
+  border-color: #facc15;
+  background: #fde68a;
 }
 
 .deleteButton {
-  border-color: #ffe4e6;
-  background: #fff1f2;
-  color: #e11d48;
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
 }
 
 .deleteButton:hover {
-  border-color: #fda4af;
-  background: #ffe4e6;
+  border-color: #f87171;
+  background: #fee2e2;
 }
 
 .editButton:focus-visible,
 .deleteButton:focus-visible,
 .createButton:focus-visible {
-  outline: 3px solid #93c5fd;
+  outline: 3px solid rgba(250, 204, 21, 0.55);
   outline-offset: 3px;
 }
 
@@ -288,9 +290,10 @@
   margin: 20px 26px;
   padding: 13px 16px;
   border: 1px solid #fecaca;
+  border-left: 4px solid #dc2626;
   border-radius: 8px;
   background: #fef2f2;
-  color: #b91c1c;
+  color: #991b1b;
   font-size: 14px;
   line-height: 1.6;
 }
@@ -309,14 +312,14 @@
 
 .emptyState h3 {
   margin: 0;
-  color: #1e293b;
+  color: #111827;
   font-size: 20px;
   font-weight: 700;
 }
 
 .emptyState p {
   margin: 10px 0 23px;
-  color: #718096;
+  color: #6b7280;
   font-size: 14px;
   line-height: 1.6;
 }
@@ -325,7 +328,7 @@
 
 .card > p:not(.error) {
   padding: 25px 26px;
-  color: #64748b;
+  color: #6b7280;
   font-size: 14px;
 }
 
@@ -401,5 +404,14 @@
 
   .error {
     margin: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .createButton,
+  .table tbody tr,
+  .editButton,
+  .deleteButton {
+    transition: none;
   }
 }
