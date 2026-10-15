@@ -6,6 +6,7 @@
 
   width: 260px;
   height: 100vh;
+  height: 100dvh;
   overflow-y: auto;
   overflow-x: hidden;
 
@@ -16,9 +17,10 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  z-index: 1000;
+  z-index: 1100;
 }
 
+/* Brand */
 .brand {
   display: flex;
   align-items: center;
@@ -26,6 +28,7 @@
   padding: 0 8px 30px;
   color: #ffffff;
   text-decoration: none;
+  flex-shrink: 0;
 }
 
 .logo {
@@ -39,6 +42,7 @@
   border-radius: 12px;
   font-size: 23px;
   font-weight: 800;
+  flex-shrink: 0;
 }
 
 .brand strong,
@@ -55,14 +59,17 @@
   font-size: 11px;
 }
 
+/* Menu heading */
 .menuTitle {
   color: #9ca3af;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 1.2px;
   padding: 12px 10px;
+  flex-shrink: 0;
 }
 
+/* Navigation */
 .navigation {
   display: flex;
   flex-direction: column;
@@ -93,19 +100,54 @@
   font-weight: 700;
 }
 
+/* Navigation icons */
 .icon {
   width: 22px;
   text-align: center;
   font-size: 20px;
+  flex-shrink: 0;
 }
 
-.sidebarBottom {
+/* Logout */
+.logoutButton {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+
   margin-top: auto;
-  padding: 22px 8px 0;
+  margin-bottom: 18px;
+  width: 100%;
+  padding: 13px 14px;
+  flex-shrink: 0;
+
+  background: #1f2937;
+  color: #f87171;
+  border: 1px solid #374151;
+  border-radius: 9px;
+
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.logoutButton:hover {
+  background: #7f1d1d;
+  color: #ffffff;
+}
+
+/* Administrator information */
+.sidebarBottom {
+  margin-top: 0;
+  padding: 20px 8px 0;
   border-top: 1px solid #374151;
+
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .adminAvatar {
@@ -125,62 +167,136 @@
   min-width: 0;
 }
 
+/* Hamburger button - hidden on desktop */
+.menuToggle {
+  display: none;
+  position: fixed;
+  top: 15px;
+  left: 15px;
 
-.logoutButton {
-  display: flex;
+  width: 44px;
+  height: 44px;
+
   align-items: center;
   justify-content: center;
-  gap: 8px;
 
-  margin-top: 16px;
-  width: 100%;
-  padding: 11px 14px;
+  background: #facc15;
+  color: #111827;
+  border: none;
+  border-radius: 10px;
 
-  background: transparent;
-  color: #f87171;
-  border: 1px solid #374151;
-  border-radius: 8px;
-
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 25px;
+  font-weight: 700;
   cursor: pointer;
 
-  transition: background 0.2s ease, color 0.2s ease;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1200;
 }
 
-.logoutButton:hover {
-  background: #7f1d1d;
-  color: #ffffff;
+/* Mobile overlay - hidden by default */
+.overlay {
+  display: none;
 }
 
-
+/* Responsive mobile sidebar */
 @media (max-width: 700px) {
+  /* Show hamburger button */
+  .menuToggle {
+    display: flex;
+  }
+
+  /* Hide sidebar off-screen by default */
   .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+
+    width: 260px;
+    max-width: 85vw;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+
+    padding: 26px 18px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    box-sizing: border-box;
+
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+
+    z-index: 1100;
+  }
+
+  /* Slide sidebar into view when opened */
+  .sidebar.sidebarOpen {
+    transform: translateX(0);
+  }
+
+  /* Dark overlay behind the sidebar */
+  .overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+
     width: 100%;
-    min-height: auto;
-    height: auto;
-    padding: 16px;
+    height: 100%;
+    padding: 0;
+
+    background: rgba(0, 0, 0, 0.55);
+    border: none;
+
+    z-index: 1050;
   }
 
+  /* Restore desktop brand spacing */
   .brand {
-    padding-bottom: 16px;
+    padding: 0 8px 30px;
   }
 
-  .menuTitle,
-  .sidebarBottom {
-    display: none;
+  .menuTitle {
+    display: block;
   }
 
+  /* Keep navigation vertical on mobile */
   .navigation {
-    flex-direction: row;
-    flex-wrap: wrap;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 8px;
   }
 
   .navLink {
-    flex: 1;
-    justify-content: center;
-    gap: 6px;
-    padding: 10px;
-    font-size: 12px;
+    flex: initial;
+    justify-content: flex-start;
+    gap: 14px;
+    padding: 13px 14px;
+    font-size: 14px;
+  }
+
+  /* Keep logout near the bottom */
+  .logoutButton {
+    margin-top: auto;
+    margin-bottom: 18px;
+  }
+
+  .sidebarBottom {
+    display: flex;
+    margin-top: 0;
+    padding: 20px 8px 0;
+  }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
+  }
+
+  .navLink,
+  .logoutButton {
+    transition: none;
   }
 }
