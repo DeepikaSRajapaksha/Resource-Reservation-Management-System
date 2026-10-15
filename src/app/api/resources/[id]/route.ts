@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -15,6 +16,16 @@ const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
   "image/webp",
 ];
+
+function getResourceId(id: string): number | null {
+  const resourceId = Number(id);
+
+  if (!Number.isInteger(resourceId) || resourceId <= 0) {
+    return null;
+  }
+
+  return resourceId;
+}
 
 function isValidImageSignature(
   bytes: Uint8Array,
@@ -54,7 +65,7 @@ function isValidImageSignature(
   return false;
 }
 
-function imageUrl(id: number, hasImage: boolean) {
+function imageUrl(id: number, hasImage: boolean): string | null {
   return hasImage ? `/api/resources/${id}/image` : null;
 }
 
@@ -65,9 +76,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const resourceId = Number(id);
+    const resourceId = getResourceId(id);
 
-    if (!Number.isInteger(resourceId) || resourceId <= 0) {
+    if (resourceId === null) {
       return NextResponse.json(
         { message: "Invalid resource ID." },
         { status: 400 }
@@ -76,6 +87,18 @@ export async function GET(
 
     const resource = await prisma.resource.findUnique({
       where: { id: resourceId },
+      select: {
+        id: true,
+        name: true,
+        category: true,
+        description: true,
+        location: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+        image: true,
+        imageType: true,
+      },
     });
 
     if (!resource) {
@@ -85,13 +108,22 @@ export async function GET(
       );
     }
 
-    // Do not send the raw image binary to the frontend.
     const { image, imageType, ...details } = resource;
 
-    return NextResponse.json({
-      ...details,
-      image: imageUrl(resource.id, Boolean(image && imageType)),
-    });
+    return NextResponse.json(
+      {
+        ...details,
+        image: imageUrl(
+          resource.id,
+          Boolean(image && imageType)
+        ),
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
+    );
   } catch (error) {
     console.error("GET RESOURCE ERROR:", error);
 
@@ -109,9 +141,9 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-    const resourceId = Number(id);
+    const resourceId = getResourceId(id);
 
-    if (!Number.isInteger(resourceId) || resourceId <= 0) {
+    if (resourceId === null) {
       return NextResponse.json(
         { message: "Invalid resource ID." },
         { status: 400 }
@@ -144,16 +176,27 @@ export async function PUT(
 
     if (name.length > 150) {
       return NextResponse.json(
-        { message: "Resource name must not exceed 150 characters." },
+        {
+          message: "Resource name must not exceed 150 characters.",
+        },
         { status: 400 }
       );
     }
 
-    let isActive = true;
+    if (
+      typeof descriptionValue !== "string" &&
+      descriptionValue !== null
+    ) {
+      return NextResponse.json(
+        { message: "Invalid resource description." },
+        { status: 400 }
+      );
+    }
 
-    if (isActiveValue === "true" || isActiveValue === "false") {
-      isActive = isActiveValue === "true";
-    } else {
+    if (
+      isActiveValue !== "true" &&
+      isActiveValue !== "false"
+    ) {
       return NextResponse.json(
         { message: "Invalid resource status." },
         { status: 400 }
@@ -169,25 +212,40 @@ export async function PUT(
       name,
       category,
       description,
-      isActive,
+      isActive: isActiveValue === "true",
     };
 
-    if (removeImageValue === "true") {
+    const removeImage = removeImageValue === "true";
+
+    if (removeImageValue !== null && !removeImage) {
+      return NextResponse.json(
+        { message: "Invalid image removal value." },
+        { status: 400 }
+      );
+    }
+
+    // Remove the image only when explicitly requested.
+    if (removeImage) {
       data.image = null;
       data.imageType = null;
     }
 
+    // A new uploaded image replaces the existing image.
     if (uploadedImage instanceof File && uploadedImage.size > 0) {
       if (!ALLOWED_IMAGE_TYPES.includes(uploadedImage.type)) {
         return NextResponse.json(
-          { message: "Choose a PNG, JPG, JPEG, or WebP image." },
+          {
+            message: "Choose a PNG, JPEG, or WebP image.",
+          },
           { status: 400 }
         );
       }
 
       if (uploadedImage.size > MAX_IMAGE_SIZE) {
         return NextResponse.json(
-          { message: "Image size must not exceed 5 MB." },
+          {
+            message: "Image size must not exceed 5 MB.",
+          },
           { status: 400 }
         );
       }
@@ -198,7 +256,9 @@ export async function PUT(
 
       if (!isValidImageSignature(buffer, uploadedImage.type)) {
         return NextResponse.json(
-          { message: "The uploaded file is not a valid image." },
+          {
+            message: "The uploaded file is not a valid image.",
+          },
           { status: 400 }
         );
       }
@@ -216,14 +276,36 @@ export async function PUT(
     const resource = await prisma.resource.update({
       where: { id: resourceId },
       data,
+      select: {
+        id: true,
+        name: true,
+        category: true,
+        description: true,
+        location: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+        image: true,
+        imageType: true,
+      },
     });
 
     const { image, imageType, ...details } = resource;
 
-    return NextResponse.json({
-      ...details,
-      image: imageUrl(resource.id, Boolean(image && imageType)),
-    });
+    return NextResponse.json(
+      {
+        ...details,
+        image: imageUrl(
+          resource.id,
+          Boolean(image && imageType)
+        ),
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
+    );
   } catch (error) {
     console.error("UPDATE RESOURCE ERROR:", error);
 
@@ -251,9 +333,9 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const resourceId = Number(id);
+    const resourceId = getResourceId(id);
 
-    if (!Number.isInteger(resourceId) || resourceId <= 0) {
+    if (resourceId === null) {
       return NextResponse.json(
         { message: "Invalid resource ID." },
         { status: 400 }
@@ -281,7 +363,10 @@ export async function DELETE(
     }
 
     return NextResponse.json(
-      { message: "Failed to delete resource. It may have related reservations." },
+      {
+        message:
+          "Failed to delete resource. It may have related reservations.",
+      },
       { status: 500 }
     );
   }
