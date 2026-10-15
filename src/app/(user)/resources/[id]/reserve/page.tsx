@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import styles from "@/styles/Reserve/Reserve.module.css";
 
@@ -10,7 +9,7 @@ type Resource = {
   name: string;
   category: string;
   description: string | null;
-  location: string | null;
+  image: string | null;
 };
 
 export default function ReservePage() {
@@ -25,6 +24,7 @@ export default function ReservePage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [imageFailed, setImageFailed] = useState(false);
 
   const startTime = searchParams.get("startTime") || "";
   const endTime = searchParams.get("endTime") || "";
@@ -32,6 +32,9 @@ export default function ReservePage() {
   useEffect(() => {
     async function fetchResource() {
       try {
+        setLoading(true);
+        setError("");
+
         const response = await fetch(`/api/resources/${params.id}`);
         const data = await response.json();
 
@@ -39,7 +42,21 @@ export default function ReservePage() {
           throw new Error(data.message || "Resource not found.");
         }
 
-        setResource(data);
+        // Support either a URL string or an object containing a URL.
+        const imageUrl =
+          typeof data.image === "string"
+            ? data.image
+            : data.image?.url ?? null;
+
+        setResource({
+          id: data.id,
+          name: data.name,
+          category: data.category,
+          description: data.description ?? null,
+          image: imageUrl,
+        });
+
+        setImageFailed(false);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load resource."
@@ -54,9 +71,7 @@ export default function ReservePage() {
     }
   }, [params.id]);
 
-  async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
-  ) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setMessage("");
@@ -66,8 +81,12 @@ export default function ReservePage() {
       return;
     }
 
-    if (new Date(endTime) <= new Date(startTime)) {
-      setError("End time must be after start time.");
+    if (
+      Number.isNaN(new Date(startTime).getTime()) ||
+      Number.isNaN(new Date(endTime).getTime()) ||
+      new Date(endTime) <= new Date(startTime)
+    ) {
+      setError("Please select a valid reservation date and time.");
       return;
     }
 
@@ -96,22 +115,15 @@ export default function ReservePage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.message || "Failed to create reservation."
-        );
+        throw new Error(data.message || "Failed to create reservation.");
       }
 
-      setMessage(
-        data.message || "Reservation created successfully."
-      );
-
+      setMessage(data.message || "Reservation created successfully.");
       setReservedBy("");
       setPurpose("");
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong."
+        err instanceof Error ? err.message : "Something went wrong."
       );
     } finally {
       setSubmitting(false);
@@ -119,17 +131,23 @@ export default function ReservePage() {
   }
 
   if (loading) {
-    return <main className={styles.container}>Loading resource...</main>;
+    return (
+      <main className={styles.container}>
+        <div className={styles.loadingCard}>Loading resource...</div>
+      </main>
+    );
   }
 
   if (!resource) {
     return (
       <main className={styles.container}>
-        <p className={styles.error}>
-          {error || "Resource not found."}
-        </p>
-        <button onClick={() => router.push("/resources")}>
-          Back to Resources
+        <p className={styles.error}>{error || "Resource not found."}</p>
+        <button
+          type="button"
+          className={styles.backButton}
+          onClick={() => router.push("/resources")}
+        >
+          ← Back to Resources
         </button>
       </main>
     );
@@ -142,36 +160,69 @@ export default function ReservePage() {
         className={styles.backButton}
         onClick={() => router.push("/resources")}
       >
-        ← Back to Resources
+        <span aria-hidden="true">←</span> Back to Resources
       </button>
 
       <header className={styles.header}>
         <span className={styles.eyebrow}>RESOURCE BOOKING</span>
         <h1>Reserve a Resource</h1>
-        <p>Complete the form below to submit your reservation.</p>
+        <p>
+          Review your selected resource and complete the form to submit
+          your reservation.
+        </p>
       </header>
 
       <section className={styles.card}>
-        <span className={styles.category}>{resource.category}</span>
-        <h2>{resource.name}</h2>
+        <div className={styles.resourceImageWrapper}>
+          {resource.image && !imageFailed ? (
+            <img
+              src={resource.image}
+              alt={resource.name}
+              className={styles.resourceImage}
+              onError={() => setImageFailed(true)}
+            />
+          ) : (
+            <div className={styles.imagePlaceholder}>
+              <span className={styles.placeholderIcon} aria-hidden="true">
+                ▧
+              </span>
+              <span>Resource image unavailable</span>
+            </div>
+          )}
+        </div>
 
-        <p>{resource.description || "No description available."}</p>
-
-        {resource.location && (
-          <p>
-            <strong>Location:</strong> {resource.location}
+        <div className={styles.resourceDetails}>
+          <span className={styles.category}>{resource.category}</span>
+          <h2>{resource.name}</h2>
+          <p className={styles.description}>
+            {resource.description || "No description available."}
           </p>
-        )}
+        </div>
+
+        <div className={styles.timeHeading}>
+          <span className={styles.timeHeadingIcon} aria-hidden="true">
+            ◷
+          </span>
+          <h3>Reservation Schedule</h3>
+        </div>
 
         <div className={styles.timeSummary}>
-          <div>
-            <span>START DATE & TIME</span>
-            <strong>{new Date(startTime).toLocaleString()}</strong>
+          <div className={styles.timeItem}>
+            <span>START DATE &amp; TIME</span>
+            <strong>
+              {startTime
+                ? new Date(startTime).toLocaleString()
+                : "Not selected"}
+            </strong>
           </div>
 
-          <div>
-            <span>END DATE & TIME</span>
-            <strong>{new Date(endTime).toLocaleString()}</strong>
+          <div className={styles.timeItem}>
+            <span>END DATE &amp; TIME</span>
+            <strong>
+              {endTime
+                ? new Date(endTime).toLocaleString()
+                : "Not selected"}
+            </strong>
           </div>
         </div>
       </section>
@@ -184,6 +235,10 @@ export default function ReservePage() {
 
       {message && (
         <div className={styles.success} role="status">
+          <div className={styles.successIcon} aria-hidden="true">
+            ✓
+          </div>
+          <h3>Reservation Submitted</h3>
           <p>{message}</p>
           <button
             type="button"
@@ -196,7 +251,15 @@ export default function ReservePage() {
 
       {!message && (
         <section className={styles.formPanel}>
-          <h2>Booking Details</h2>
+          <div className={styles.formHeader}>
+            <span className={styles.formIcon} aria-hidden="true">
+              ✎
+            </span>
+            <div>
+              <h2>Booking Details</h2>
+              <p>Please provide your details below.</p>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit}>
             <label htmlFor="reservedBy">Your Name</label>
@@ -206,6 +269,7 @@ export default function ReservePage() {
               onChange={(event) => setReservedBy(event.target.value)}
               maxLength={100}
               placeholder="Enter your full name"
+              autoComplete="name"
               required
             />
 
@@ -216,14 +280,17 @@ export default function ReservePage() {
               onChange={(event) => setPurpose(event.target.value)}
               maxLength={1000}
               rows={4}
-              placeholder="Why do you need this resource?"
+              placeholder="Explain why you need this resource..."
               required
             />
 
-            <button type="submit" disabled={submitting}>
-              {submitting
-                ? "Submitting..."
-                : "Submit Reservation"}
+            <button
+              type="submit"
+              className={styles.submitButton}
+              disabled={submitting}
+            >
+              {submitting ? "Submitting..." : "Submit Reservation"}
+              {!submitting && <span aria-hidden="true"> →</span>}
             </button>
           </form>
         </section>

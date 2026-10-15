@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -10,7 +11,7 @@ type Resource = {
   name: string;
   category: string;
   description: string | null;
-  location: string | null;
+  image: string | null;
 };
 
 export default function UserResourcesPage() {
@@ -58,7 +59,15 @@ export default function UserResourcesPage() {
         );
       }
 
-      setResources(data);
+      setResources(
+        data.map((resource: Resource) => ({
+          ...resource,
+          image: resource.image
+            ? resource.image
+            : null,
+        }))
+      );
+
       setSearched(true);
     } catch (err) {
       setError(
@@ -73,9 +82,7 @@ export default function UserResourcesPage() {
 
   function reserveResource(resource: Resource) {
     if (!startTime || !endTime) {
-      setError(
-        "Please select a reservation date and time first."
-      );
+      setError("Please select a reservation date and time first.");
       return;
     }
 
@@ -91,9 +98,6 @@ export default function UserResourcesPage() {
 
   return (
     <main className={styles.container}>
-  
-      {/* Page Header */}
-      
       <header className={styles.header}>
         <div className={styles.headerTop}>
           <div className={styles.headerContent}>
@@ -116,8 +120,6 @@ export default function UserResourcesPage() {
         </div>
       </header>
 
-
-      {/* Search Panel */}
       <section className={styles.searchPanel}>
         <div className={styles.field}>
           <label htmlFor="startTime">
@@ -128,9 +130,7 @@ export default function UserResourcesPage() {
             id="startTime"
             type="datetime-local"
             value={startTime}
-            onChange={(event) =>
-              setStartTime(event.target.value)
-            }
+            onChange={(event) => setStartTime(event.target.value)}
             required
           />
         </div>
@@ -144,9 +144,7 @@ export default function UserResourcesPage() {
             id="endTime"
             type="datetime-local"
             value={endTime}
-            onChange={(event) =>
-              setEndTime(event.target.value)
-            }
+            onChange={(event) => setEndTime(event.target.value)}
             required
           />
         </div>
@@ -161,14 +159,12 @@ export default function UserResourcesPage() {
         </button>
       </section>
 
-      {/* Error Message */}
       {error && (
         <p className={styles.error} role="alert">
           {error}
         </p>
       )}
 
-      {/* Search Results */}
       {searched && (
         <section className={styles.results}>
           <div className={styles.resultsHeader}>
@@ -207,38 +203,47 @@ export default function UserResourcesPage() {
                   key={resource.id}
                   className={styles.card}
                 >
-                  <div className={styles.cardTop}>
-                    <div className={styles.resourceIcon}>
-                      ▦
-                    </div>
-
-                    <span className={styles.category}>
-                      {resource.category}
-                    </span>
+                  <div className={styles.cardImage}>
+                    {resource.image ? (
+                      <img
+                        src={resource.image}
+                        alt={resource.name}
+                        className={styles.resourceImage}
+                        loading="lazy"
+                        onError={(event) => {
+                          event.currentTarget.style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <div className={styles.imagePlaceholder}>
+                        <span aria-hidden="true">▦</span>
+                        <p>No image available</p>
+                      </div>
+                    )}
                   </div>
 
-                  <h3>{resource.name}</h3>
+                  <div className={styles.cardContent}>
+                    <div className={styles.cardTop}>
+                      <span className={styles.category}>
+                        {resource.category}
+                      </span>
+                    </div>
 
-                  <p className={styles.description}>
-                    {resource.description ||
-                      "No description available."}
-                  </p>
+                    <h3>{resource.name}</h3>
 
-                  {resource.location && (
-                    <p className={styles.location}>
-                      <span>⌖</span> {resource.location}
+                    <p className={styles.description}>
+                      {resource.description ||
+                        "No description available."}
                     </p>
-                  )}
 
-                  <button
-                    type="button"
-                    className={styles.selectButton}
-                    onClick={() =>
-                      reserveResource(resource)
-                    }
-                  >
-                    Reserve This Resource
-                  </button>
+                    <button
+                      type="button"
+                      className={styles.selectButton}
+                      onClick={() => reserveResource(resource)}
+                    >
+                      Reserve This Resource
+                    </button>
+                  </div>
                 </article>
               ))}
             </div>
@@ -246,7 +251,6 @@ export default function UserResourcesPage() {
         </section>
       )}
 
-      {/* Footer */}
       <footer className={styles.footer}>
         <p>
           Choose a resource, check availability, and book

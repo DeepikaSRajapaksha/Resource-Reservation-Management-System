@@ -271,7 +271,7 @@ export default function Userpage() {
           </p>
         </div>
 
-        <Link href="/admin/resources" className={styles.primaryButton}>
+        <Link href="/admin/reservations" className={styles.primaryButton}>
           + Book a Resource
         </Link>
       </header>

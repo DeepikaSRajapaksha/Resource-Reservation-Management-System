@@ -235,55 +235,45 @@
   white-space: nowrap;
 }
 
+
 .editButton,
 .deleteButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 34px;
-  padding: 7px 13px;
+  padding: 7px 12px;
   border: 1px solid transparent;
-  border-radius: 7px;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 650;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
   text-decoration: none;
   cursor: pointer;
   transition:
     background 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease;
+    border-color 0.2s ease;
 }
 
 .editButton {
-  border-color: #fde68a;
   background: #fef3c7;
   color: #78350f;
+  border-color: #fde68a;
 }
 
 .editButton:hover {
-  border-color: #facc15;
   background: #fde68a;
+  border-color: #facc15;
 }
 
 .deleteButton {
-  border-color: #fecaca;
   background: #fef2f2;
   color: #b91c1c;
+  border-color: #fecaca;
 }
 
 .deleteButton:hover {
-  border-color: #f87171;
   background: #fee2e2;
+  border-color: #f87171;
 }
-
-.editButton:focus-visible,
-.deleteButton:focus-visible,
-.createButton:focus-visible {
-  outline: 3px solid rgba(250, 204, 21, 0.55);
-  outline-offset: 3px;
-}
-
 /* Error Message */
 
 .error {

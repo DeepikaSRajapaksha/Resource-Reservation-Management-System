@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
@@ -40,10 +41,32 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: { id: "desc" },
+      select: {
+        id: true,
+        name: true,
+        category: true,
+        description: true,
+        image: true,
+        imageType: true,
+      },
+      orderBy: {
+        id: "desc",
+      },
     });
 
-    return NextResponse.json(resources);
+    // Return an image URL instead of sending binary image data.
+    const availableResources = resources.map((resource) => ({
+      id: resource.id,
+      name: resource.name,
+      category: resource.category,
+      description: resource.description,
+      image:
+        resource.image && resource.imageType
+          ? `/api/resources/${resource.id}/image`
+          : null,
+    }));
+
+    return NextResponse.json(availableResources);
   } catch (error) {
     console.error("Availability check failed:", error);
 
