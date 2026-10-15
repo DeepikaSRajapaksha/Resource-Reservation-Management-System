@@ -17,7 +17,8 @@ model Resource {
   name        String
   category    String
   description String?
-  location    String?
+  image         Bytes?
+  imageType     String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

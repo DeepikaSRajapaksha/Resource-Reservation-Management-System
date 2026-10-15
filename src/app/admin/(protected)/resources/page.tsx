@@ -12,7 +12,7 @@ type Resource = {
   name: string;
   category: string;
   description: string | null;
-  location: string | null;
+  image: string | null;
   isActive: boolean;
 };
 
@@ -20,39 +20,52 @@ export default function ResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const { showToast } = useToast();
-
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [brokenImages, setBrokenImages] = useState<number[]>([]);
+
+  const { showToast } = useToast();
 
   const loadResources = useCallback(async () => {
     setLoading(true);
     setError("");
 
     try {
-      const response = await fetch("/api/resources");
+      const response = await fetch("/api/resources", {
+        cache: "no-store",
+      });
+
+      const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error("Could not load resources.");
+        throw new Error(
+          data?.message || data?.error || "Could not load resources."
+        );
       }
 
-      const data: Resource[] = await response.json();
-      setResources(data);
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid resource data received from the server.");
+      }
+
+      setResources(data as Resource[]);
+      setBrokenImages([]);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load resources."
-      );
+      const message =
+        err instanceof Error ? err.message : "Failed to load resources.";
+
+      setError(message);
+      showToast("error", message);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     void loadResources();
   }, [loadResources]);
 
   async function handleDelete() {
-    if (deleteId === null) return;
+    if (deleteId === null || deleting) return;
 
     setDeleting(true);
     setError("");
@@ -70,10 +83,16 @@ export default function ResourcesPage() {
         );
       }
 
+      setResources((current) =>
+        current.filter((resource) => resource.id !== deleteId)
+      );
+
+      setBrokenImages((current) =>
+        current.filter((id) => id !== deleteId)
+      );
+
       setDeleteId(null);
       showToast("success", "Resource deleted successfully!");
-
-      await loadResources();
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to delete resource.";
@@ -86,38 +105,55 @@ export default function ResourcesPage() {
   }
 
   return (
-    <div className={styles.page}>
+    <main className={styles.page}>
       <header className={styles.header}>
         <div>
           <h1>Resource Management</h1>
           <p>View and manage all registered resources.</p>
         </div>
 
-        <Link href="/admin/resources/new" className={styles.createButton}>
+        <Link
+          href="/admin/resources/new"
+          className={styles.createButton}
+        >
           + Create Resource
         </Link>
       </header>
 
       <section className={styles.card}>
         <div className={styles.listHeader}>
-          <h2>All Resources</h2>
-          <span>
+          <div>
+            <h2>All Resources</h2>
+            <p>Manage resource details, images, and availability.</p>
+          </div>
+
+          <span className={styles.totalCount}>
             Total: <strong>{resources.length}</strong>
           </span>
         </div>
 
         {error && (
-          <p className={styles.error} role="alert">
+          <div className={styles.error} role="alert">
             {error}
-          </p>
+            <button
+              type="button"
+              onClick={() => void loadResources()}
+              disabled={loading}
+            >
+              Retry
+            </button>
+          </div>
         )}
 
         {loading ? (
-          <p>Loading resources...</p>
+          <div className={styles.loadingState}>
+            <p>Loading resources...</p>
+          </div>
         ) : resources.length === 0 ? (
           <div className={styles.emptyState}>
             <h3>No resources found</h3>
             <p>Create your first resource to get started.</p>
+
             <Link
               href="/admin/resources/new"
               className={styles.createButton}
@@ -131,9 +167,9 @@ export default function ResourcesPage() {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Resource</th>
+                  <th>Image</th>
+                  <th>Resource Details</th>
                   <th>Category</th>
-                  <th>Location</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -142,17 +178,51 @@ export default function ResourcesPage() {
               <tbody>
                 {resources.map((resource) => (
                   <tr key={resource.id}>
-                    <td>{resource.id}</td>
+                    <td className={styles.resourceId}>
+                      #{resource.id}
+                    </td>
+
                     <td>
+                      {resource.image &&
+                      !brokenImages.includes(resource.id) ? (
+                        <img
+                          src={resource.image}
+                          alt={`${resource.name} resource`}
+                          width={80}
+                          height={60}
+                          loading="lazy"
+                          className={styles.resourceImage}
+                          onError={() => {
+                            setBrokenImages((current) =>
+                              current.includes(resource.id)
+                                ? current
+                                : [...current, resource.id]
+                            );
+                          }}
+                        />
+                      ) : (
+                        <div className={styles.noImage}>
+                          No image
+                        </div>
+                      )}
+                    </td>
+
+                    <td className={styles.resourceDetails}>
                       <strong>{resource.name}</strong>
+
                       {resource.description && (
                         <p className={styles.description}>
                           {resource.description}
                         </p>
                       )}
                     </td>
-                    <td>{resource.category}</td>
-                    <td>{resource.location || "—"}</td>
+
+                    <td>
+                      <span className={styles.categoryBadge}>
+                        {resource.category}
+                      </span>
+                    </td>
+
                     <td>
                       <span
                         className={
@@ -161,9 +231,11 @@ export default function ResourcesPage() {
                             : styles.inactive
                         }
                       >
+                        <span className={styles.statusDot} />
                         {resource.isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
+
                     <td>
                       <div className={styles.rowActions}>
                         <Link
@@ -177,6 +249,7 @@ export default function ResourcesPage() {
                           type="button"
                           className={styles.deleteButton}
                           onClick={() => setDeleteId(resource.id)}
+                          disabled={deleting}
                         >
                           Delete
                         </button>
@@ -189,16 +262,18 @@ export default function ResourcesPage() {
           </div>
         )}
       </section>
+
       {deleteId !== null && (
         <ConfirmModal
           title="Delete Resource?"
           message="Are you sure you want to delete this resource? This action cannot be undone."
           onConfirm={handleDelete}
-          onCancel={() => setDeleteId(null)}
+          onCancel={() => {
+            if (!deleting) setDeleteId(null);
+          }}
           loading={deleting}
         />
       )}
-    </div>
+    </main>
   );
 }
-
