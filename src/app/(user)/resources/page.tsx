@@ -1,8 +1,8 @@
-
-
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import styles from "@/styles/UserResources/UserResources.module.css";
 
 type Resource = {
@@ -14,23 +14,19 @@ type Resource = {
 };
 
 export default function UserResourcesPage() {
+  const router = useRouter();
+
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [resources, setResources] = useState<Resource[]>([]);
-  const [selectedResource, setSelectedResource] =
-    useState<Resource | null>(null);
-  const [reservedBy, setReservedBy] = useState("");
-  const [purpose, setPurpose] = useState("");
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   async function searchResources() {
     setError("");
-    setMessage("");
-    setSelectedResource(null);
+    setSearched(false);
+    setResources([]);
 
     if (!startTime || !endTime) {
       setError("Please select a start date and end date.");
@@ -43,7 +39,6 @@ export default function UserResourcesPage() {
     }
 
     setLoading(true);
-    setSearched(false);
 
     try {
       const query = new URLSearchParams({
@@ -58,108 +53,100 @@ export default function UserResourcesPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Unable to search resources.");
+        throw new Error(
+          data.message || "Unable to search resources."
+        );
       }
 
       setResources(data);
       setSearched(true);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Something went wrong."
+        err instanceof Error
+          ? err.message
+          : "Something went wrong."
       );
     } finally {
       setLoading(false);
     }
   }
 
-  async function createReservation(
-    event: React.FormEvent<HTMLFormElement>
-  ) {
-    event.preventDefault();
-    setError("");
-    setMessage("");
-
-    if (!selectedResource) {
-      setError("Please select a resource.");
-      return;
-    }
-
-    if (!reservedBy.trim() || !purpose.trim()) {
-      setError("Please enter your name and reservation purpose.");
-      return;
-    }
-
-    setSubmitting(true);
-
-    try {
-      const response = await fetch("/api/reservations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          resourceId: selectedResource.id,
-          reservedBy: reservedBy.trim(),
-          startTime: new Date(startTime).toISOString(),
-          endTime: new Date(endTime).toISOString(),
-          purpose: purpose.trim(),
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to create reservation.");
-      }
-
-      setMessage(
-        `Reservation request submitted successfully. Reference: ${data.id}`
-      );
-
-      setSelectedResource(null);
-      setReservedBy("");
-      setPurpose("");
-
-      await searchResources();
-    } catch (err) {
+  function reserveResource(resource: Resource) {
+    if (!startTime || !endTime) {
       setError(
-        err instanceof Error ? err.message : "Something went wrong."
+        "Please select a reservation date and time first."
       );
-    } finally {
-      setSubmitting(false);
+      return;
     }
+
+    const query = new URLSearchParams({
+      startTime: new Date(startTime).toISOString(),
+      endTime: new Date(endTime).toISOString(),
+    });
+
+    router.push(
+      `/resources/${resource.id}/reserve?${query.toString()}`
+    );
   }
 
   return (
     <main className={styles.container}>
+  
+      {/* Page Header */}
+      
       <header className={styles.header}>
-        <span className={styles.eyebrow}>RESOURCE BOOKING</span>
-        <h1>Available Resources</h1>
-        <p>
-          Find the right resource for your needs. Choose your preferred
-          date and time to see what is available.
-        </p>
+        <div className={styles.headerTop}>
+          <div className={styles.headerContent}>
+            <span className={styles.eyebrow}>
+              RESOURCE BOOKING
+            </span>
+
+            <h1>Available Resources</h1>
+
+            <p>
+              Find the right resource for your needs. Choose your
+              preferred date and time to see what is available.
+            </p>
+          </div>
+
+          <Link href="/" className={styles.backHomeLink}>
+            <span aria-hidden="true">←</span>
+            Back to Home
+          </Link>
+        </div>
       </header>
 
+
+      {/* Search Panel */}
       <section className={styles.searchPanel}>
         <div className={styles.field}>
-          <label htmlFor="startTime">Start Date &amp; Time</label>
+          <label htmlFor="startTime">
+            Start Date &amp; Time
+          </label>
+
           <input
             id="startTime"
             type="datetime-local"
             value={startTime}
-            onChange={(event) => setStartTime(event.target.value)}
+            onChange={(event) =>
+              setStartTime(event.target.value)
+            }
             required
           />
         </div>
 
         <div className={styles.field}>
-          <label htmlFor="endTime">End Date &amp; Time</label>
+          <label htmlFor="endTime">
+            End Date &amp; Time
+          </label>
+
           <input
             id="endTime"
             type="datetime-local"
             value={endTime}
-            onChange={(event) => setEndTime(event.target.value)}
+            onChange={(event) =>
+              setEndTime(event.target.value)
+            }
             required
           />
         </div>
@@ -174,23 +161,22 @@ export default function UserResourcesPage() {
         </button>
       </section>
 
+      {/* Error Message */}
       {error && (
         <p className={styles.error} role="alert">
           {error}
         </p>
       )}
 
-      {message && (
-        <p className={styles.success} role="status">
-          {message}
-        </p>
-      )}
-
+      {/* Search Results */}
       {searched && (
         <section className={styles.results}>
           <div className={styles.resultsHeader}>
             <div>
-              <span className={styles.eyebrow}>YOUR SEARCH</span>
+              <span className={styles.eyebrow}>
+                YOUR SEARCH
+              </span>
+
               <h2>
                 {resources.length > 0
                   ? "Resources available"
@@ -206,18 +192,26 @@ export default function UserResourcesPage() {
           {resources.length === 0 ? (
             <div className={styles.emptyState}>
               <div className={styles.emptyIcon}>⌕</div>
+
               <h3>No availability for this time</h3>
+
               <p>
-                Try selecting another date or time to find available
-                resources.
+                Try selecting another date or time to find
+                available resources.
               </p>
             </div>
           ) : (
             <div className={styles.grid}>
               {resources.map((resource) => (
-                <article key={resource.id} className={styles.card}>
+                <article
+                  key={resource.id}
+                  className={styles.card}
+                >
                   <div className={styles.cardTop}>
-                    <div className={styles.resourceIcon}>▦</div>
+                    <div className={styles.resourceIcon}>
+                      ▦
+                    </div>
+
                     <span className={styles.category}>
                       {resource.category}
                     </span>
@@ -238,20 +232,12 @@ export default function UserResourcesPage() {
 
                   <button
                     type="button"
-                    className={
-                      selectedResource?.id === resource.id
-                        ? styles.selectedButton
-                        : styles.selectButton
+                    className={styles.selectButton}
+                    onClick={() =>
+                      reserveResource(resource)
                     }
-                    onClick={() => {
-                      setSelectedResource(resource);
-                      setError("");
-                      setMessage("");
-                    }}
                   >
-                    {selectedResource?.id === resource.id
-                      ? "✓ Selected"
-                      : "Reserve This Resource"}
+                    Reserve This Resource
                   </button>
                 </article>
               ))}
@@ -260,78 +246,12 @@ export default function UserResourcesPage() {
         </section>
       )}
 
-      {selectedResource && (
-        <section className={styles.reservationPanel}>
-          <div className={styles.formHeader}>
-            <span className={styles.eyebrow}>BOOKING DETAILS</span>
-            <h2>Request a Reservation</h2>
-            <p>
-              Complete the details below to submit your reservation
-              request.
-            </p>
-          </div>
-
-          <div className={styles.selectedSummary}>
-            <div className={styles.resourceIcon}>▦</div>
-            <div>
-              <span>Selected resource</span>
-              <strong>{selectedResource.name}</strong>
-              <small>{selectedResource.category}</small>
-            </div>
-          </div>
-
-          <div className={styles.timeSummary}>
-            <div>
-              <span>START</span>
-              <strong>{new Date(startTime).toLocaleString()}</strong>
-            </div>
-            <div>
-              <span>END</span>
-              <strong>{new Date(endTime).toLocaleString()}</strong>
-            </div>
-          </div>
-
-          <form onSubmit={createReservation}>
-            <div className={styles.field}>
-              <label htmlFor="reservedBy">Your Name</label>
-              <input
-                id="reservedBy"
-                value={reservedBy}
-                onChange={(event) => setReservedBy(event.target.value)}
-                required
-                maxLength={100}
-                placeholder="Enter your full name"
-              />
-            </div>
-
-            <div className={styles.field}>
-              <label htmlFor="purpose">Reservation Purpose</label>
-              <textarea
-                id="purpose"
-                value={purpose}
-                onChange={(event) => setPurpose(event.target.value)}
-                required
-                maxLength={1000}
-                rows={4}
-                placeholder="Explain why you need this resource"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className={styles.searchButton}
-              disabled={submitting}
-            >
-              {submitting
-                ? "Submitting..."
-                : "Submit Reservation Request"}
-            </button>
-          </form>
-        </section>
-      )}
-
+      {/* Footer */}
       <footer className={styles.footer}>
-        <p>Choose a resource, check availability, and book with confidence.</p>
+        <p>
+          Choose a resource, check availability, and book
+          with confidence.
+        </p>
       </footer>
     </main>
   );

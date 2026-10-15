@@ -26,12 +26,9 @@ export default function UserHomePage() {
 
           <div className={styles.actions}>
             <Link href="/resources" className={styles.primaryButton}>
-              Explore Resources
+              Explore Reservation
             </Link>
 
-            <Link href="/reservations" className={styles.secondaryButton}>
-              My Reservations
-            </Link>
           </div>
         </div>
 

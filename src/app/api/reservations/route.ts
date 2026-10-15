@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
@@ -35,12 +36,17 @@ export async function POST(request: NextRequest) {
       purpose,
     } = body;
 
+    // 1. Validate required fields
     if (
-      !resourceId ||
-      !reservedBy?.trim() ||
+      resourceId === undefined ||
+      resourceId === null ||
+      resourceId === "" ||
+      typeof reservedBy !== "string" ||
+      !reservedBy.trim() ||
       !startTime ||
       !endTime ||
-      !purpose?.trim()
+      typeof purpose !== "string" ||
+      !purpose.trim()
     ) {
       return NextResponse.json(
         { message: "All fields are required" },
@@ -52,6 +58,7 @@ export async function POST(request: NextRequest) {
     const start = new Date(startTime);
     const end = new Date(endTime);
 
+    // 2. Validate ID and date/time
     if (
       !Number.isInteger(resourceIdNumber) ||
       resourceIdNumber <= 0 ||
@@ -71,8 +78,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 3. Check whether the resource exists and is active
     const resource = await prisma.resource.findUnique({
-      where: { id: resourceIdNumber },
+      where: {
+        id: resourceIdNumber,
+      },
     });
 
     if (!resource || !resource.isActive) {
@@ -82,6 +92,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 4. Check for overlapping reservations BEFORE creating
+    const conflictingReservation =
+      await prisma.reservation.findFirst({
+        where: {
+          resourceId: resourceIdNumber,
+
+          // Rejected reservations do not block availability
+          status: {
+            not: "REJECTED",
+          },
+
+          // Overlap condition
+          startTime: {
+            lt: end,
+          },
+          endTime: {
+            gt: start,
+          },
+        },
+      });
+
+    // 5. If a conflict exists, do not create a reservation
+    if (conflictingReservation) {
+      return NextResponse.json(
+        {
+          message:
+            "This resource has already been reserved for the selected time. Please choose another time.",
+        },
+        { status: 409 }
+      );
+    }
+
+    // 6. Create the reservation only if the time is available
     const reservation = await prisma.reservation.create({
       data: {
         resourceId: resourceIdNumber,
@@ -95,26 +138,14 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const conflictingReservation = await prisma.reservation.findFirst({
-      where: {
-        resourceId: resourceIdNumber,
-        status: { not: "REJECTED" },
-        startTime: { lt: end },
-        endTime: { gt: start },
+    // 7. Return the successfully created reservation
+    return NextResponse.json(
+      {
+        message: "Reservation created successfully",
+        reservation,
       },
-    });
-
-    if (conflictingReservation) {
-      return NextResponse.json(
-        {
-          message:
-            "This resource has already been reserved for the selected time. Please choose another time.",
-        },
-        { status: 409 }
-      );
-    }
-
-    return NextResponse.json(reservation, { status: 201 });
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Failed to create reservation:", error);
 

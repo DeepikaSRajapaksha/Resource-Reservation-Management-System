@@ -27,19 +27,6 @@ export default function UserNavbar() {
         </span>
       </Link>
 
-      <nav className={styles.navLinks} aria-label="Main navigation">
-        <Link href="/" className={styles.navLink}>
-          Home
-        </Link>
-
-        <Link href="/resources" className={styles.navLink}>
-          Resources
-        </Link>
-
-        <Link href="/reservations" className={styles.navLink}>
-          My Reservations
-        </Link>
-      </nav>
 
       <Link href="/admin/login" className={styles.adminButton}>
         <svg

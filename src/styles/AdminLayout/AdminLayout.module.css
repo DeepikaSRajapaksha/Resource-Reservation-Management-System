@@ -1,0 +1,25 @@
+
+.adminLayout {
+  min-height: 100vh;
+}
+
+/* Main content scrolls independently */
+.mainContent {
+  margin-left: 260px;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  padding: 24px;
+}
+
+/* Responsive layout */
+@media (max-width: 700px) {
+  .mainContent {
+    margin-left: 0;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+    padding: 16px;
+  }
+}
